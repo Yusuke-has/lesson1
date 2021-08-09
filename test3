@@ -1,0 +1,45 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+from time import sleep
+
+base_url="https://doda.jp/DodaFront/View/JobSearchList.action?pr=13&pic=1&ds=0&oc=0112M%2C0113M%2C010401S%2C010402S%2C010404S&so=50&tp={}&page=1&usrclk_searchList=PC-logoutJobSearchList_searchResultHeaderArea_pagination_prev"
+
+d_list=[]
+for i in range(1,71):
+   
+    url=base_url.format(i)
+    sleep(3)
+    r=requests.get(url,timeout=3)
+    r.raise_for_status()
+
+    soup=BeautifulSoup(r.content,"lxml")
+
+    companies=soup.select(".layoutList02")
+
+    sleep(5)
+
+    for company in companies:
+        company_name=company.select_one(".company").text
+        page_url=company.select_one(".btnJob03").get("href")
+        page_url=page_url.replace("-tab__pr","-tab__jd")
+        sleep(3)
+
+        company_r=requests.get(page_url,timeout=3)
+        company_r.raise_for_status()
+        company_soup=BeautifulSoup(company_r.content,"lxml")
+
+        table=company_soup.select_one("#company_profile_table")
+        company_url=table.select_one("a")
+        if company_url:
+            company_url=company_url.get("href")
+        d_list.append({"company_name":company_name,
+                    "company_url": company_url
+                    })
+
+        print(d_list)
+    
+    
+df=pd.DataFrame(d_list)
+df.to_csv("company_list1-2.csv",index=None,encoding="utf-8-sig")   
