@@ -1,4 +1,4 @@
-#記事のタイトルと更新日を取得する
+##記事のタイトルと更新日を取得する
 
 import requests
 from bs4 import BeautifulSoup
