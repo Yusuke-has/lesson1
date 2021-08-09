@@ -1,0 +1,34 @@
+#QiitaアドベントカレンダーのURL一覧を取得する
+
+
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+
+d_list=[]
+
+
+url="https://qiita.com/advent-calendar/2016/crawler"
+
+r=requests.get(url)
+
+r.raise_for_status()
+
+soup=BeautifulSoup(r.content,"lxml")
+
+articles=soup.select(".adventCalendarCalendar_comment")
+
+
+for article in articles:
+    articles_name=article.select_one("a").text
+    articles_address=article.select_one("a").get("href")
+    d_list.append({"articles_name":articles_name,
+                   "articles_web":articles_address
+                  })
+
+
+print(d_list)
+
+df=pd.DataFrame(d_list)
+df.to_csv("article_list.csv",index=None,encoding="utf-8-sig")
