@@ -1,0 +1,49 @@
+#答え合わせ
+
+from time import sleep
+from selenium  import webdriver
+from selenium.webdriver.common.keys import Keys
+
+options=webdriver.ChromeOptions()
+
+options.add_argument("--incognito")
+#3.Userーagentの設定
+
+driver=webdriver.Chrome(
+                        executable_path="/Users/kusunokiyuusuke/test/chromedriver",
+                        options=options
+                       )
+driver.implicitly_wait(10)                     
+driver.get("https://news.yahoo.co.jp")
+sleep(3)
+#検索ボックスがどのようなHTMLタグに格納されているか確認　sc-kgoBCfをクラス名に持つ inputタグ
+search_box=driver.find_element_by_css_selector("input.sc-kgoBCf")
+sleep(5)
+
+#seach_boxに対して機械学習という文字列を入力
+search_box.send_keys("機械学習")
+sleep(3)
+
+search_box.submit()
+sleep(3)
+
+while True:
+  #1.スクロールする
+  driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")  
+  sleep(2)
+  #2ボタンのCSSセレクタを取得する
+  button=driver.find_elements_by_css_selector(
+      "div.newsFeed>div>span>button")
+  #３.ボタンを押す
+  if button :
+      button[0].click()
+  else:
+    break    
+
+a_tags=driver.find_elements_by_css_selector("a.newsFeed_item_link")
+
+for i, a_tag in enumerate(a_tags):
+    print("="*30,i,"="*30)
+    print(a_tag.find_element_by_css_selector(".newsFeed_item_title").text)
+    print(a_tag.get_attribute("href"))
+driver.quit()
