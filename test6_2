@@ -1,0 +1,45 @@
+#休止状態
+from time import sleep
+#Webdriverの設定
+from selenium import webdriver
+
+
+options=webdriver.ChromeOptions()
+#シークレットモードの設定
+options.add_argument("--incognito")
+options.add_argument("--headless")
+
+driver=webdriver.Chrome(
+    executable_path="/Users/kusunokiyuusuke/Desktop/scraiping/Selenium/chromedriver",
+    options=options)
+
+#要素が見つからなかったら10秒間待機
+driver.implicitly_wait(10)
+
+driver.get("https://atsumaru.jp/area/7/list?sagid=all")
+
+sleep(3)
+
+##下にスクロールできなくなったらwhile文を抜ける
+
+height=driver.execute_script("return document.body.scrollHeight")
+
+new_height=0
+
+
+while True:
+    print(height)
+    driver.execute_script(f"window.scrollTo(0,{height})")
+    sleep(5)
+    new_height=driver.execute_script(
+        "return document.body.scrollHeight")
+
+    if height==new_height:
+        break
+    height=new_height
+
+
+with open ("company_list.html","w")as f:   
+    f.write(driver.page_source)
+
+driver.quit()
