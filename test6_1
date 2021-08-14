@@ -1,0 +1,44 @@
+rom time import sleep
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+
+#HTMLを読み込む
+with open ("company_list.html","r")as f:   
+    html=f.read()
+#HTMLを解析
+soup=BeautifulSoup(html,"lxml")
+#会社名、住所、電話番号を取得
+
+a_tags=soup.select("span.exe>a")
+
+print(len(a_tags))
+d_list=[]
+
+for a_tag in a_tags:
+    url="https://atsumaru.jp/"+a_tag.get("href")
+
+    r=requests.get(url)
+    r.raise_for_status()
+
+    sleep(3)
+
+    page_soup=BeautifulSoup(r.content,"lxml")
+
+    company_name=page_soup.select_one("#detailBox>h2").text
+#地図はこちらを含むtdタグの直下のpタグの最初　-soup-containsは間違い
+    address=page_soup.select_one("td:contains('地図はこちら') >p:first-of-type").text
+
+    tel=page_soup.select_one('div.telNo>p>strong>a').text
+
+    d_list.append({
+      "company_name":company_name
+      ,"address":address
+      ,"tel":tel
+    })
+
+    print(d_list[-1])
+    
+
+df=pd.DataFrame(d_list)
+df.to_csv("company_list.csv",index=None,encoding="utf-8-sig")    
