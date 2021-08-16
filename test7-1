@@ -1,0 +1,47 @@
+import os
+#休止状態
+from time import sleep
+#Webdriverの設定
+from selenium import webdriver
+
+
+options=webdriver.ChromeOptions()
+#シークレットモードの設定
+options.add_argument("--incognito")
+options.add_argument("--headless")
+
+driver=webdriver.Chrome(
+    executable_path="/Users/kusunokiyuusuke/Desktop/scraiping/ystudy/tools/chromedriver",
+    options=options)
+
+driver.implicitly_wait(10)
+
+driver.get("https://www.mizuhobank.co.jp/retail/takarakuji/check/numbers/backnumber/index.html")
+
+sleep(3)
+
+#１．トップページでURL一覧を取得
+ #まずは直近1年から考える
+latest_links=driver.find_elements_by_css_selector("tr.js-backnumber-temp-a>td:first-of-type>a")
+backnumber_links=driver.find_elements_by_css_selector("tr.js-backnumber-temp-b>td>a")
+
+urls=[e.get_attribute("href") for e in latest_links+backnumber_links]
+
+
+#２．Selniumで各URLにアクセスして、ページのURLを取得
+dir_name=(os.path.dirname(os.path.abspath(__file__)))
+for i,url in enumerate(urls):
+    print(i)
+    print(url)
+    driver.get(url)
+    sleep(5)
+
+    html=driver.page_source
+    
+    p=f"/Users/kusunokiyuusuke/Desktop/scraiping/ystudy/Lesson4/html/{driver.title}.html"
+    p=os.path.join(dir_name,"html",f"{driver.title}.html")
+    with open(p,"w") as f:
+        f.write(html)
+
+sleep(3)
+driver.quit()        
